@@ -97,6 +97,7 @@ typedef struct
 								 * primary node */
 	char		replication_state [NAMEDATALEN];	/* "state" from pg_stat_replication */
 	char		replication_sync_state [NAMEDATALEN];	/* "sync_state" from pg_stat_replication */
+	time_t		auto_failback_time; /* resume time of auto_failback */
 }			BackendInfo;
 
 typedef struct

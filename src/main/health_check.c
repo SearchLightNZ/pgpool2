@@ -235,7 +235,6 @@ establish_persistent_connection(int node)
 {
 	BackendInfo *bkinfo;
 	int			retry_cnt;
-	static time_t auto_failback_interval = 0; /* resume time of auto_failback */
 	bool		check_failback = false;
 	time_t		now;
 	char		*dbname;
@@ -254,7 +253,7 @@ establish_persistent_connection(int node)
 		/* get current time to use auto_faliback_interval */
 		now = time(NULL);
 
-		if (pool_config->auto_failback && auto_failback_interval < now &&
+		if (pool_config->auto_failback && bkinfo->auto_failback_time < now &&
 			STREAM && !strcmp(bkinfo->replication_state, "streaming") && !Req_info->switching)
 		{
 				ereport(DEBUG1,
@@ -351,7 +350,7 @@ establish_persistent_connection(int node)
 					(errmsg("request auto failback, node id:%d", node)));
 				/* get current time to use auto_faliback_interval */
 				now = time(NULL);
-				auto_failback_interval = now + pool_config->auto_failback_interval;
+				bkinfo->auto_failback_time = now + pool_config->auto_failback_interval;
 
 				send_failback_request(node, true, REQ_DETAIL_CONFIRMED);
 		}
