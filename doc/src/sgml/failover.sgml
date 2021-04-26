@@ -706,11 +706,19 @@ if (we need to executed follow master command)
      <para>
       Specifies the minimum amount of time in seconds for execution interval of auto failback.
       Next auto failback won't execute until that specified time have passed
-      after previous auto failback. When <productname>Pgpool-II</productname> frequently detect
-      backend down because of network error for example, you may avoid repeating
+      after previous auto failback or node transitioning to "down" status (including temporary
+      "down" status during a follow_master event). When <productname>Pgpool-II</productname>
+      frequently detect backend down because of network error for example, you may avoid repeating
       failover and failback by setting this parameter to large enough value.
       The default is 60. Setting this parameter to 0 means that auto failback don't wait.
      </para>
+     <note>
+      <para>
+       This should be set to longer than the time it takes for follow_master_command to execute
+       for all your backends, otherwise auto_failover may detect a backend as "up" even though
+       it has not yet been configured to follow the new primary backend.
+      </para>
+     </note
     </listitem>
    </varlistentry>
 
