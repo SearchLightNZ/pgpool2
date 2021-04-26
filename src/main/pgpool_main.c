@@ -1900,6 +1900,7 @@ failover(void)
 
 					BACKEND_INFO(node_id_set[i]).backend_status = CON_DOWN; /* set down status */
 					pool_set_backend_status_changed_time(node_id_set[i]);
+					pool_set_backend_auto_failback_time(node_id_set[i]);
 					if (reqkind == NODE_QUARANTINE_REQUEST)
 					{
 						BACKEND_INFO(node_id_set[i]).quarantine = true;
@@ -2192,6 +2193,7 @@ failover(void)
 											bkinfo->backend_port)));
 							bkinfo->backend_status = CON_DOWN;	/* set down status */
 							pool_set_backend_status_changed_time(i);
+							pool_set_backend_auto_failback_time(i);
 							(void) write_status_file();
 
 							follow_cnt++;
@@ -3816,6 +3818,7 @@ read_status_file(bool discard_status)
 			{
 				BACKEND_INFO(i).backend_status = CON_DOWN;
 				pool_set_backend_status_changed_time(i);
+				pool_set_backend_auto_failback_time(i);
 				(void) write_status_file();
 				ereport(LOG,
 						(errmsg("read_status_file: %d th backend is set to down status", i)));
@@ -3881,6 +3884,7 @@ read_status_file(bool discard_status)
 			{
 				BACKEND_INFO(i).backend_status = CON_DOWN;
 				pool_set_backend_status_changed_time(i);
+				pool_set_backend_auto_failback_time(i);
 				ereport(LOG,
 						(errmsg("reading status file: %d th backend is set to down status", i)));
 			}
@@ -4217,6 +4221,7 @@ sync_backend_from_watchdog(void)
 			{
 				BACKEND_INFO(i).backend_status = CON_DOWN;
 				pool_set_backend_status_changed_time(i);
+				pool_set_backend_auto_failback_time(i);
 				my_backend_status[i] = &(BACKEND_INFO(i).backend_status);
 				reload_maste_node_id = true;
 				node_status_was_changed_to_down = true;
@@ -4521,4 +4526,16 @@ pool_set_backend_status_changed_time(int backend_id)
 
 	tval = time(NULL);
 	BACKEND_INFO(backend_id).status_changed_time = tval;
+}
+
+/*
+ * Set backend auto failback time for specified backend id.
+ */
+void
+pool_set_backend_auto_failback_time(int backend_id)
+{
+	time_t		tval;
+
+	tval = time(NULL);
+	BACKEND_INFO(backend_id).auto_failback_time = tval + pool_config->auto_failback_interval;
 }
